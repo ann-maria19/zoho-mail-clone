@@ -7,91 +7,96 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f7f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { height: 100vh; background: white; border-right: 1px solid #dee2e6; position: fixed; }
+        .sidebar { height: 100vh; background: white; border-right: 1px solid #dee2e6; position: fixed; display: flex; flex-direction: column; }
         .main-content { margin-left: 16.666667%; }
         .email-item { cursor: pointer; border-bottom: 1px solid #eee; transition: 0.2s; background: white; }
         .email-item:hover { background-color: #f8f9fa; }
         .unread { font-weight: bold; border-left: 4px solid #007bff; }
         .nav-link:hover { background-color: #f0f0f0; border-radius: 5px; }
-        a.text-decoration-none:hover { text-decoration: none; }
     </style>
 </head>
 <body>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block sidebar p-3">
+                <h4 class="text-primary mb-4">Zoho Clone</h4>
+                <button class="btn btn-primary w-100 mb-4" data-bs-toggle="modal" data-bs-target="#composeModal">New Mail</button>
+                
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark {% if folder == 'inbox' %}bg-light fw-bold{% endif %}" href="/inbox/?folder=inbox">📥 Inbox</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark {% if folder == 'sent' %}bg-light fw-bold{% endif %}" href="/inbox/?folder=sent">📤 Sent</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark {% if folder == 'trash' %}bg-light fw-bold{% endif %}" href="/inbox/?folder=trash">🗑️ Trash</a>
+                    </li>
+                </ul>
 
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-md-2 d-none d-md-block sidebar p-3">
-            <button class="btn btn-primary w-100 mb-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#composeModal">
-                + New Mail
-            </button>
-            <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active fw-bold" href="/inbox/">📥 Inbox</a></li>
-                <li class="nav-item"><a class="nav-link text-dark" href="#">📤 Sent</a></li>
-                <li class="nav-item"><a class="nav-link text-dark" href="#">📁 Drafts</a></li>
-                <li class="nav-item"><a class="nav-link text-dark" href="#">🗑️ Trash</a></li>
-            </ul>
-        </nav>
-
-        <main class="col-md-10 p-0 main-content">
-            <div class="bg-white p-3 border-bottom d-flex justify-content-between align-items-center sticky-top">
-                <h5 class="m-0">Inbox</h5>
-                <input type="text" class="form-control w-25" placeholder="Search mail...">
-            </div>
-
-            <div class="list-group list-group-flush">
-                {% for email in emails %}
-                <a href="/email/{{ email.id }}/" class="text-decoration-none text-dark">
-                    <div class="list-group-item email-item p-3 {% if not email.is_read %}unread{% endif %}">
-                        <div class="d-flex justify-content-between">
-                            <span class="mb-1 text-primary">{{ email.sender }}</span>
-                            <small class="text-muted">{{ email.timestamp|date:"M d, H:i" }}</small>
-                        </div>
-                        <h6 class="mb-1">{{ email.subject }}</h6>
-                        <small class="text-muted text-truncate d-block">{{ email.body|truncatechars:100 }}</small>
-                    </div>
-                </a>
-                {% empty %}
-                <div class="p-5 text-center text-muted">
-                    <p>Your inbox is empty.</p>
+                <hr>
+                <div class="dropdown pb-4">
+                    <span class="d-block small text-muted">Logged in as:</span>
+                    <strong>{{ user.username }}</strong>
+                    <form action="{% url 'logout' %}" method="post" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Logout</button>
+                    </form>
                 </div>
-                {% endfor %}
+            </nav>
+
+            <main class="col-md-10 main-content p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-capitalize">{{ folder }}</h2>
+                    <span class="text-muted">{{ emails|length }} messages</span>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="list-group list-group-flush">
+                        {% for email in emails %}
+                        <a href="/email/{{ email.id }}/" class="list-group-item list-group-item-action email-item {% if not email.is_read %}unread{% endif %} p-3">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1 text-truncate" style="max-width: 200px;">
+                                    {% if folder == 'sent' %}To: {{ email.recipient_email }}{% else %}From: {{ email.sender.username }}{% endif %}
+                                </h6>
+                                <small class="text-muted">{{ email.timestamp|date:"M d, H:i" }}</small>
+                            </div>
+                            <p class="mb-1 text-dark">{{ email.subject }}</p>
+                            <small class="text-muted text-truncate d-block">{{ email.body|truncatechars:100 }}</small>
+                        </a>
+                        {% empty %}
+                        <div class="p-5 text-center text-muted">
+                            <h5>No emails in this folder.</h5>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal fade" id="composeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/send/" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title">New Message</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="email" name="recipient" class="form-control mb-3" placeholder="Recipient Email (e.g. bob@test.com)" required>
+                        <input type="text" name="subject" class="form-control mb-3" placeholder="Subject" required>
+                        <textarea name="body" class="form-control" rows="5" placeholder="Write your message..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
             </div>
-        </main>
+        </div>
     </div>
-</div>
 
-<div class="modal fade" id="composeModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title">New Message</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="/send/">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label class="form-label fw-bold">To</label>
-            <input type="email" name="recipient" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">Subject</label>
-            <input type="text" name="subject" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">Message</label>
-            <textarea name="body" class="form-control" rows="8" required></textarea>
-          </div>
-          <div class="modal-footer border-0 px-0 pb-0">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Discard</button>
-            <button type="submit" class="btn btn-primary px-4">Send Email</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
