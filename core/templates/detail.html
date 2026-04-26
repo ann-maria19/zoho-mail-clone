@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+    <a href="/inbox/" style="text-decoration: none; color: #0055ff;">&larr; Back to Inbox</a>
+    <hr>
+    <h1 style="margin-bottom: 5px;">{{ email.subject }}</h1>
+    <p style="color: #666; font-size: 0.9em;">
+        From: <strong>{{ email.sender.username }}</strong> <br>
+        Date: {{ email.timestamp }}
+    </p>
+    <hr>
+    <div style="white-space: pre-wrap; line-height: 1.6; margin-top: 20px;">
+        {{ email.body }}
+    </div>
+    <hr>
+    <form action="/delete/{{ email.id }}/" method="post" onsubmit="return confirm('Move to trash?')">
+        {% csrf_token %}
+        <button type="submit" style="background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+            🗑️ Delete Message
+        </button>
+    </form>
+</div>
+{% endblock %}

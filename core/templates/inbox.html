@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Your Conversations</h2>
+<table style="width: 100%; border-collapse: collapse;">
+    {% for email in emails %}
+    <tr style="border-bottom: 1px solid #eee; cursor: pointer;" onclick="location.href='/email/{{ email.id }}/'">
+        <td style="padding: 15px; font-weight: bold;">{{ email.sender.username }}</td>
+        <td style="padding: 15px;">{{ email.subject }}</td>
+        <td style="padding: 15px; color: #888;">{{ email.timestamp|date:"M d" }}</td>
+    </tr>
+    {% empty %}
+    <p>No emails found.</p>
+    {% endfor %}
+</table>
+{% endblock %}
