@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def inbox(request):
-    # Only show emails sent TO the logged-in user that aren't deleted
     emails = Email.objects.filter(recipient_email=request.user, is_deleted=False).order_by('-timestamp')
     return render(request, 'inbox.html', {'emails': emails, 'folder': 'inbox'})
 
@@ -21,17 +20,16 @@ def trash_emails(request):
     emails = Email.objects.filter(recipient_email=request.user, is_deleted=True).order_by('-timestamp')
     return render(request, 'inbox.html', {'emails': emails, 'folder': 'trash'})
 
-@login_required
 def email_detail(request, email_id):
-    email = get_object_or_404(Email, id=email_id)
+    # Use get_object_or_404 to ensure it exists
+    email = get_object_or_404(Email, id=email_id, recipient_email=request.user)
     
-    # Security check: Only allow the sender or actual recipient to see the email
-    if request.user == email.sender or request.user == email.recipient_email:
+    # Update status to read, but KEEP the email
+    if not email.is_read:
         email.is_read = True
         email.save()
-        return render(request, 'detail.html', {'email': email})
-    
-    return redirect('/inbox/')
+        
+    return render(request, 'detail.html', {'email': email})
 
 @login_required
 def send_email(request):
