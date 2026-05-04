@@ -1,24 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="max-width: 800px; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
-    <a href="/inbox/" style="text-decoration: none; color: #0055ff;">&larr; Back to Inbox</a>
-    <hr>
-    <h1 style="margin-bottom: 5px;">{{ email.subject }}</h1>
-    <p style="color: #666; font-size: 0.9em;">
+<div style="max-width: 800px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <a href="/inbox/" style="text-decoration: none; color: #0055ff; font-weight: bold;">&larr; Back to Inbox</a>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <h1 style="margin: 0; font-size: 1.8em; color: #1a212d;">{{ email.subject }}</h1>
+        <span style="background: #e8f0fe; color: #1a73e8; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold;">
+            {% if email.read_at %}✓ Read{% else %}Unread{% endif %}
+        </span>
+    </div>
+
+    <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
         From: <strong>{{ email.sender.username }}</strong> <br>
-        Date: {{ email.timestamp }}
+        Received: {{ email.timestamp|date:"D, d M Y | H:i" }}
     </p>
-    <hr>
-    <div style="white-space: pre-wrap; line-height: 1.6; margin-top: 20px;">
+
+    {% if email.read_at %}
+    <p style="color: #2e7d32; font-size: 0.8em; background: #e8f5e9; padding: 5px 10px; border-radius: 4px; display: inline-block;">
+        🕒 <strong>Research Data:</strong> First read on {{ email.read_at|date:"M d, Y at H:i:s" }}
+    </p>
+    {% endif %}
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    
+    <div style="white-space: pre-wrap; line-height: 1.6; min-height: 200px; color: #333;">
         {{ email.body }}
     </div>
-    <hr>
-    <form action="/delete/{{ email.id }}/" method="post" onsubmit="return confirm('Move to trash?')">
-        {% csrf_token %}
-        <button type="submit" style="background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
-            🗑️ Delete Message
+    
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    
+    <div style="display: flex; gap: 10px;">
+        <form action="/delete/{{ email.id }}/" method="post" onsubmit="return confirm('Move to trash?')">
+            {% csrf_token %}
+            <button type="submit" style="background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                🗑️ Delete Message
+            </button>
+        </form>
+        
+        <button onclick="location.href='/inbox/'" style="background: #f1f3f4; color: #5f6368; border: 1px solid #dadce0; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+            Close
         </button>
-    </form>
+    </div>
 </div>
 {% endblock %}

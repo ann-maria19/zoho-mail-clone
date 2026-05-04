@@ -22,13 +22,16 @@
             padding: 20px; 
             display: flex; 
             flex-direction: column;
-            flex-shrink: 0; /* Prevents sidebar from shrinking */
+            flex-shrink: 0; 
         }
 
-        /* The Logo you wanted */
-        .logo-container { margin-bottom: 30px; font-size: 1.5rem; font-weight: bold; }
-        .logo-zoho { color: white; }
-        .logo-mail { color: #0055ff; margin-left: 5px; font-weight: 400; }
+        /* Zoho Multi-color Logo */
+        .logo-container { margin-bottom: 30px; font-size: 1.5rem; font-weight: bold; cursor: default; }
+        .z-red { color: #EE3124; }
+        .z-blue { color: #00A1E4; }
+        .z-yellow { color: #FFB900; }
+        .z-green { color: #7DB92E; }
+        .logo-mail { color: #ffffff; margin-left: 2px; font-weight: 400; font-size: 0.9em; }
 
         .btn-compose { 
             background: #0055ff; 
@@ -40,7 +43,9 @@
             cursor: pointer; 
             margin-bottom: 20px; 
             font-weight: bold;
+            transition: background 0.3s;
         }
+        .btn-compose:hover { background: #0044cc; }
 
         .nav-link { 
             display: block; 
@@ -59,34 +64,67 @@
             display: flex; 
             flex-direction: column; 
             background: white;
-            min-width: 0; /* Fixes flexbox content overflow issues */
+            min-width: 0; 
         }
 
         .header { 
             background: #ffffff; 
             border-bottom: 1px solid #e0e0e0; 
-            padding: 10px 30px; 
+            padding: 0 30px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             height: 60px;
         }
 
-        /* 4. This is where your inbox/emails live */
+        /* Search Bar Styling */
+        .search-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 50px;
+        }
+        .search-form {
+            width: 100%;
+            max-width: 550px;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 8px;
+            border: 1px solid #dfe1e5;
+            background-color: #f1f3f4;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-input:focus {
+            background-color: white;
+            box-shadow: 0 1px 6px rgba(32,33,36,0.2);
+            border-color: transparent;
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            color: #888;
+            pointer-events: none;
+        }
+
+        /* 4. Main content area */
         .main-content { 
             flex: 1; 
             padding: 30px; 
-            overflow-y: auto; /* Makes only this part scrollable */
+            overflow-y: auto; 
         }
 
-        /* Avatar styling for the header */
         .avatar {
             width: 35px; height: 35px; background: #ff4081; color: white;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-weight: bold; margin-left: 10px;
         }
 
-        /* Shadow Hover for Email Rows */
         tr { border-bottom: 1px solid #eee; transition: 0.2s; cursor: pointer; }
         tr:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: white !important; }
     </style>
@@ -95,7 +133,7 @@
 
     <div class="sidebar">
         <div class="logo-container">
-            <span class="logo-zoho">Zoho</span><span class="logo-mail">Mail</span>
+            <span class="z-red">Z</span><span class="z-blue">o</span><span class="z-yellow">h</span><span class="z-green">o</span><span class="logo-mail">Mail</span>
         </div>
         
         <button class="btn-compose" onclick="location.href='/send/'">+ New Mail</button>
@@ -114,8 +152,16 @@
 
     <div class="view-pane">
         <div class="header">
-            <span style="font-weight: bold; color: #555;">MAIL</span>
-            <div style="display: flex; align-items: center;">
+            <div style="font-weight: bold; color: #555; min-width: 50px;">MAIL</div>
+
+            <div class="search-container">
+                <form action="{% url 'search_mail' %}" method="GET" class="search-form">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" name="q" class="search-input" placeholder="Search by subject or keyword..." value="{{ request.GET.q }}">
+                </form>
+            </div>
+
+            <div style="display: flex; align-items: center; min-width: 150px; justify-content: flex-end;">
                 <span style="font-size: 0.9em; color: #666;">{{ user.username }}</span>
                 <div class="avatar">{{ user.username|first|upper }}</div>
             </div>

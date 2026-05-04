@@ -14,4 +14,4 @@ class Email(models.Model):
     is_deleted = models.BooleanField(default=False) 
 
     def __str__(self):
-        return self.subject
+        return self.subjecty 
