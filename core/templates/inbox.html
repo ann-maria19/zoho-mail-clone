@@ -8,7 +8,8 @@
         <td style="padding: 15px; font-weight: bold;">{{ email.sender.username }}</td>
         <td style="padding: 15px;">{{ email.subject }}</td>
         <td style="padding: 15px; color: #888;">{{ email.timestamp|date:"M d" }}</td>
-    </tr>
+    </tr> 
+    
     {% empty %}
     <p>No emails found.</p>
     {% endfor %}
